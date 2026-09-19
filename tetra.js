@@ -26,8 +26,10 @@ const linesEl = document.getElementById('lines');
 
 const startScreen = document.getElementById('startScreen');
 const gameOverScreen = document.getElementById('gameOver');
+const gameContainer = document.getElementById('gameContainer');
 const startBtn = document.getElementById('startBtn');
 const restartBtn = document.getElementById('restartBtn');
+const musicToggle = document.getElementById('musicToggle');
 
 /* ---------- Audio Elements ---------- */
 const bgMusic = document.getElementById('bgMusic');
@@ -40,6 +42,7 @@ let score = 0;
 let lines = 0;
 let gameInterval = null;
 let gameState = "start"; // start | playing | gameover | paused
+let musicEnabled = false;
 
 /* ---------- Helpers ---------- */
 function randomPiece() {
@@ -73,6 +76,7 @@ function startGame() {
   score = 0;
   lines = 0;
   gameState = "playing";
+  musicEnabled = musicToggle.checked;
 
   scoreEl.textContent = 0;
   linesEl.textContent = 0;
@@ -80,6 +84,7 @@ function startGame() {
 
   startScreen.classList.add('hidden');
   gameOverScreen.classList.add('hidden');
+  gameContainer.classList.remove('hidden');
 
   currentPiece = randomPiece();
   nextPiece = randomPiece();
@@ -88,9 +93,11 @@ function startGame() {
   resetInterval();
   update();
 
-  // Start background music
-  bgMusic.currentTime = 0;
-  bgMusic.play();
+  // Start background music if enabled
+  if (musicEnabled) {
+    bgMusic.currentTime = 0;
+    bgMusic.play();
+  }
 }
 
 function endGame() {
@@ -99,10 +106,23 @@ function endGame() {
   gameOverScreen.classList.remove('hidden');
 
   // Stop background music
-  bgMusic.pause();
+  if (musicEnabled) {
+    bgMusic.pause();
+  }
 }
 
-/* ---------- Movement Functions ---------- */
+function quitGame() {
+  clearInterval(gameInterval);
+  gameState = "start";
+  gameContainer.classList.add('hidden');
+  gameOverScreen.classList.add('hidden');
+  startScreen.classList.remove('hidden');
+
+  // Stop background music
+  if (musicEnabled) {
+    bgMusic.pause();
+  }
+}
 function move(dx, dy) {
   if (gameState !== "playing") return false;
 
@@ -163,13 +183,13 @@ function togglePause() {
   if (gameState === "playing") {
     gameState = "paused";
     clearInterval(gameInterval);
-    bgMusic.pause();
+    if (musicEnabled) bgMusic.pause();
     update(); // draw current frame
     drawPauseOverlay();
   } else if (gameState === "paused") {
     gameState = "playing";
     resetInterval();
-    bgMusic.play();
+    if (musicEnabled) bgMusic.play();
   }
 }
 
@@ -207,8 +227,13 @@ function update() {
 
 /* ---------- Input Handling ---------- */
 document.addEventListener('keydown', e => {
-  if (gameState === "paused" && e.key !== 'p') return;
-  if (gameState === "gameover") return;
+  if (gameState === "paused" && e.key !== 'p' && e.key.toLowerCase() !== 'q') return;
+  if (gameState === "gameover" && e.key.toLowerCase() !== 'q') return;
+
+  // Prevent default scroll behavior for game keys
+  if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' '].includes(e.key)) {
+    e.preventDefault();
+  }
 
   if (e.key === 'ArrowLeft') move(-1, 0);
   if (e.key === 'ArrowRight') move(1, 0);
@@ -216,6 +241,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowUp') rotate(currentPiece, board);
   if (e.key === ' ') hardDrop();   // SPACE = hard drop
   if (e.key.toLowerCase() === 'p') togglePause();
+  if (e.key.toLowerCase() === 'q') quitGame();   // Q = quit to start screen
 
   update();
 });
@@ -223,7 +249,3 @@ document.addEventListener('keydown', e => {
 /* ---------- Button Handling ---------- */
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', startGame);
-
-/* ---------- Initial Render ---------- */
-board = initBoard();
-drawBoard(ctx, board, boardSettings.blockSize);

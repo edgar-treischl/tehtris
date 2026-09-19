@@ -6,16 +6,58 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Tehtris</h1>
+  <div class="game-container hidden" id="gameContainer">
+    <h1>Tehtris</h1>
 
-  <div class="game-container">
-    <canvas id="gameCanvas" width="200" height="400"></canvas>
-    <canvas id="nextCanvas" width="80" height="80" data-size="80"></canvas>
+    <div class="canvas-wrapper">
+      <canvas id="gameCanvas" width="200" height="400"></canvas>
+      <canvas id="nextCanvas" width="80" height="80" data-size="80"></canvas>
+    </div>
+
+    <div class="info">
+      <p>Score: <span id="score">0</span></p>
+      <p>Level: <span id="level">1</span></p>
+      <p>Lines: <span id="lines">0</span></p>
+    </div>
   </div>
 
   <!-- Start screen -->
-  <div id="startScreen" class="overlay">
-    <h2>Press Start</h2>
+  <div id="startScreen" class="overlay start-overlay">
+    <h2>Tehtris</h2>
+    <p class="intro-text">Drop, rotate, and fill lines to score points!</p>
+    
+    <div class="controls-section">
+      <h3>Controls</h3>
+      <div class="control-item">
+        <span class="key">←  →</span>
+        <span>Move Left/Right</span>
+      </div>
+      <div class="control-item">
+        <span class="key">↓</span>
+        <span>Soft Drop</span>
+      </div>
+      <div class="control-item">
+        <span class="key">↑</span>
+        <span>Rotate</span>
+      </div>
+      <div class="control-item">
+        <span class="key">SPACE</span>
+        <span>Hard Drop</span>
+      </div>
+      <div class="control-item">
+        <span class="key">P</span>
+        <span>Pause/Resume</span>
+      </div>
+      <div class="control-item">
+        <span class="key">Q</span>
+        <span>Quit to Start</span>
+      </div>
+    </div>
+
+    <div class="music-setting">
+      <input type="checkbox" id="musicToggle">
+      <label for="musicToggle">Enable Music</label>
+    </div>
     <button id="startBtn">Start Game</button>
   </div>
 
@@ -23,12 +65,6 @@
   <div id="gameOver" class="overlay hidden">
     <h2>Game Over</h2>
     <button id="restartBtn">Restart</button>
-  </div>
-
-  <div class="info">
-    <p>Score: <span id="score">0</span></p>
-    <p>Level: <span id="level">1</span></p>
-    <p>Lines: <span id="lines">0</span></p>
   </div>
 
   <!-- Audio -->
